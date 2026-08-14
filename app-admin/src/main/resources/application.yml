@@ -1,0 +1,36 @@
+# API quản trị — phục vụ trang admin Next.js.
+# Phần dùng chung với app-public nằm ở core: classpath:foodmap-core.yml.
+
+spring:
+  config:
+    import: classpath:foodmap-core.yml
+
+  application:
+    name: foodmap-admin
+
+  profiles:
+    default: local
+
+  datasource:
+    hikari:
+      # Hẹp có chủ ý. Số moderator ít, và pool nhỏ khiến một truy vấn thống kê nặng
+      # không thể hút hết connection của CSDL rồi làm chậm app di động.
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+
+  flyway:
+    # TẮT. Lược đồ do app-public quản lý.
+    #
+    # Bật cả hai app sẽ khiến chúng tranh nhau bảng flyway_schema_history — tiến trình
+    # khởi động sau sẽ chết, hoặc tệ hơn là chạy migration nửa chừng.
+    #
+    # `ddl-auto` vẫn là `validate` (thừa kế từ core): app này khởi động thất bại nếu
+    # entity không khớp lược đồ, tức là ai đó quên deploy app-public trước.
+    enabled: false
+
+server:
+  port: ${SERVER_PORT:8081}
+
+foodmap:
+  cors:
+    allowed-origins:
+      - http://localhost:3000

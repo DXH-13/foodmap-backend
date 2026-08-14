@@ -1,0 +1,25 @@
+# Production — API công khai.
+#
+# Mọi bí mật lấy từ secret manager của nền tảng triển khai, KHÔNG từ file .env.
+# JWT_SECRET của prod phải KHÁC dev — dùng chung thì token dev sẽ hợp lệ ở prod.
+# JWT_SECRET phải GIỐNG app-admin: token cấp ở tiến trình này phải đọc được ở kia.
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+
+foodmap:
+  cors:
+    # App di động là native, không gửi Origin. Chỉ thêm origin nếu chạy Expo Web thật.
+    allowed-origins: []
+
+springdoc:
+  # Không phơi Swagger UI ra internet ở production
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.foodmap: INFO

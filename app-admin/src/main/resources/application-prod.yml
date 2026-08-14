@@ -1,0 +1,26 @@
+# Production — API quản trị.
+#
+# JWT_SECRET phải GIỐNG app-public: token cấp ở tiến trình này phải đọc được ở kia.
+#
+# Tiến trình này nên đặt SAU tường lửa hoặc giới hạn theo IP nội bộ. Nó không phục vụ
+# người dùng cuối, nên không có lý do gì để phơi ra internet.
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+
+foodmap:
+  cors:
+    allowed-origins:
+      - https://admin.foodmap.vn
+
+springdoc:
+  # Không phơi Swagger UI ra internet ở production
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.foodmap: INFO

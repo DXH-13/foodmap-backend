@@ -1,0 +1,25 @@
+# Profile dùng cho test — API quản trị.
+#
+# Flyway được BẬT ở đây, khác với production (nơi nó tắt vì app-public lo lược đồ).
+# Lý do: test chạy trên một container PostGIS rỗng của riêng nó, không có app-public
+# nào bên cạnh để dựng bảng. Không bật thì `ddl-auto: validate` sẽ thất bại ngay.
+#
+# Cố ý KHÔNG nạp db/dev-data — test khẳng định trên lược đồ sạch.
+
+spring:
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration
+
+foodmap:
+  jwt:
+    secret: chuoi-bi-mat-chi-dung-cho-test-it-nhat-32-ky-tu-de-jjwt-chap-nhan
+  chat:
+    api-key: test-key-khong-goi-that
+
+logging:
+  level:
+    root: WARN
+    com.foodmap: INFO
+    org.testcontainers: INFO

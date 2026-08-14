@@ -1,0 +1,31 @@
+# API công khai — phục vụ ứng dụng di động.
+# Phần dùng chung với app-admin nằm ở core: classpath:foodmap-core.yml.
+
+spring:
+  config:
+    import: classpath:foodmap-core.yml
+
+  application:
+    name: foodmap-public
+
+  profiles:
+    default: local
+
+  datasource:
+    hikari:
+      # Rộng hơn app-admin: đây là tiến trình chịu tải người dùng cuối.
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+
+  flyway:
+    # App NÀY sở hữu lược đồ. Đúng một app được bật Flyway — xem app-admin/application.yml.
+    enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+foodmap:
+  cors:
+    # App di động chạy native nên không gửi Origin và không cần CORS.
+    # Danh sách này chỉ phục vụ Expo Web lúc phát triển.
+    allowed-origins:
+      - http://localhost:8081

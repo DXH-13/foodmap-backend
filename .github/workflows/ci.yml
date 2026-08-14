@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,7 +34,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             CHANGED=$(git diff --name-only --diff-filter=M \
               origin/${{ github.base_ref }}...HEAD \
-              -- 'src/main/resources/db/migration/*.sql')
+              -- 'core/src/main/resources/db/migration/*.sql')
             if [ -n "$CHANGED" ]; then
               echo "::error::Migration da merge bi sua doi:"
               echo "$CHANGED"
@@ -52,5 +52,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bao-cao-test
-          path: build/reports/tests/test/
+          # Mỗi module có báo cáo riêng: app-public/, app-admin/
+          path: '*/build/reports/tests/test/'
           retention-days: 7

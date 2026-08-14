@@ -1,0 +1,11 @@
+# Môi trường tích hợp nội bộ — API công khai.
+
+foodmap:
+  cors:
+    # Origin của trang quản trị KHÔNG nằm ở đây: nó gọi app-admin (cổng 8081).
+    allowed-origins: []
+
+logging:
+  level:
+    root: INFO
+    com.foodmap: DEBUG

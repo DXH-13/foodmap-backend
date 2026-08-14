@@ -1,0 +1,15 @@
+# Máy lập trình viên — API quản trị.
+#
+# Lưu ý khi chạy local: app-public phải khởi động TRƯỚC ít nhất một lần để Flyway
+# dựng lược đồ. Chạy app-admin trên CSDL rỗng sẽ thất bại ở bước `ddl-auto: validate` —
+# đó là hành vi đúng, không phải lỗi cấu hình.
+
+logging:
+  level:
+    com.foodmap: DEBUG
+    org.hibernate.SQL: DEBUG
+
+management:
+  endpoint:
+    health:
+      show-details: always

@@ -9,17 +9,73 @@ File này chỉ ghi những gì **riêng của repo này** và những chỗ d�
 
 ## Chạy
 
+Repo này có **ba module Gradle và hai ứng dụng chạy được**.
+
 ```bash
 # Hạ tầng phải bật trước (ở repo cha)
 ../scripts/dev-up.sh
 
-./gradlew bootRun      # http://localhost:8080
-./gradlew test         # cần Docker cho Testcontainers
+# API công khai — cho app di động. CHẠY CÁI NÀY TRƯỚC: nó dựng lược đồ bằng Flyway.
+./gradlew :app-public:bootRun     # http://localhost:8080
+
+# API quản trị — cho trang admin. Cần lược đồ đã tồn tại.
+./gradlew :app-admin:bootRun      # http://localhost:8081
+
+./gradlew test                    # cả hai module, cần Docker cho Testcontainers
 ./gradlew build
 ```
 
-Profile mặc định là `local` (khai trong `application.yml`). Cổng CSDL local là **5433**,
-Redis **6380** — lệch chuẩn để không đụng dịch vụ khác trên máy.
+`./gradlew bootRun` trống **không chạy được** — Gradle không biết chọn app nào.
+Luôn ghi rõ `:app-public:` hoặc `:app-admin:`.
+
+Profile mặc định là `local`. Cổng CSDL local là **5433**, Redis **6380** — lệch chuẩn
+để không đụng dịch vụ khác trên máy.
+
+---
+
+## Ba module, và luật của chúng
+
+| Module | Là gì | Cổng |
+|---|---|---|
+| `core` | Thư viện: entity, repository, service, migration Flyway, bảo mật dùng chung | — |
+| `app-public` | API cho app di động. **Sở hữu Flyway** | 8080 |
+| `app-admin` | API cho trang quản trị | 8081 |
+
+Hai app dùng **chung một database** nhưng là **hai tiến trình riêng**: tách được
+connection pool, cấu hình bảo mật, lịch deploy và mức scale.
+
+**Bốn luật không được phá:**
+
+1. **Chỉ `app-public` chạy Flyway.** `app-admin` để `spring.flyway.enabled: false`.
+   Bật cả hai thì chúng tranh nhau bảng `flyway_schema_history` và tiến trình khởi động
+   sau sẽ chết. Ngoại lệ duy nhất: profile `test` của `app-admin` bật Flyway, vì test
+   chạy trên container rỗng của riêng nó.
+
+2. **Lược đồ và entity chỉ định nghĩa ở `core`.** Không tạo entity trong app module.
+   Đây là lý do chọn multi-module thay vì hai repo: trình biên dịch bắt được lệch entity
+   ngay lúc build, không để tới lúc chạy.
+
+3. **Controller đặt đúng chỗ theo người dùng:**
+   - Endpoint cho app di động → `app-public`, package `com.foodmap.<feature>.web`
+   - Endpoint `/api/v1/admin/**` → `app-admin`, package `com.foodmap.<feature>.admin`
+   - Endpoint **cả hai** cùng phơi (đăng nhập, refresh token) → `core`.
+     Cả hai app đều quét `com.foodmap` nên controller ở `core` xuất hiện ở cả hai.
+
+4. **Hai app phải dùng chung `JWT_SECRET`.** Token cấp ở tiến trình này phải đọc được
+   ở tiến trình kia. Khác secret thì moderator đăng nhập xong sẽ bị 401 ngay request sau.
+
+Deploy theo thứ tự: **migration trước, `app-public` trước, `app-admin` sau.** Trong lúc
+deploy hai tiến trình chạy lệch phiên bản nhau, nên migration phải tương thích ngược —
+thêm cột thì được, xoá hay đổi tên cột thì phải tách làm hai lần deploy.
+
+### Cấu hình nằm ở đâu
+
+`core/src/main/resources/foodmap-core.yml` giữ phần dùng chung. Mỗi app nạp nó bằng
+`spring.config.import` rồi ghi đè phần riêng. **File của app thắng file core**;
+profile riêng (`application-local.yml`, `-dev`, `-prod`) thắng cả hai.
+
+Đừng khai `spring.profiles.active` hay `spring.profiles.default` trong `foodmap-core.yml` —
+Spring Boot cấm khai profile trong file được import.
 
 ---
 
@@ -71,19 +127,39 @@ Sai thì viết migration mới. Ngoại lệ duy nhất: migration chưa push k
 ## Cấu trúc
 
 ```
-com.foodmap
-├─ config/        SecurityConfig, WebConfig, OpenApiConfig, JpaConfig,
-│                 RestAuthenticationHandlers, props/FoodmapProperties
+core/src/main/java/com.foodmap
+├─ config/        WebConfig, OpenApiConfig, JpaConfig, PasswordConfig,
+│                 RestAuthenticationHandlers, ApiSecurityDefaults,
+│                 props/FoodmapProperties
 ├─ common/        ApiError, PageResponse, BaseEntity, GeoUtils, exception/
 ├─ auth/          JwtService, JwtAuthenticationFilter, AuthPrincipal
-└─ place/         Place, PlaceRepository, PlaceService, PlaceController, dto/
+└─ place/         Place, PlaceRepository, PlaceService, dto/     ← không có controller
+core/src/main/resources/
+├─ foodmap-core.yml          cấu hình dùng chung
+├─ db/migration/ db/dev-data/
+└─ messages.properties, messages_en.properties
+core/src/testFixtures/       TestcontainersConfiguration (dùng chung cho cả hai app)
+
+app-public/src/main/java/com.foodmap
+├─ FoodmapPublicApplication
+├─ publicapi/PublicSecurityConfig
+└─ place/web/PlaceController
+
+app-admin/src/main/java/com.foodmap
+├─ FoodmapAdminApplication
+└─ adminapi/AdminSecurityConfig
 ```
 
 Package-by-feature. Class chỉ dùng trong một feature thì để package-private.
 Cần dùng chéo feature thì đi qua service `public`, **không** gọi repository của feature khác.
 
-Module còn thiếu ở skeleton, sẽ thêm theo lộ trình: `user`, `review`, `feedback`,
-`favorite`, `visit`, `media`, `notification`, `chat`, `admin`.
+`ApiSecurityDefaults` giữ phần bảo mật giống nhau giữa hai app (CSRF, CORS, session,
+hình dạng lỗi 401/403, vị trí filter JWT). Phần **phải** khác nhau — luật phân quyền theo
+đường dẫn — nằm ở `SecurityFilterChain` của từng app. Khác biệt cốt lõi:
+`app-public` kết thúc bằng `authenticated()`, `app-admin` kết thúc bằng `denyAll()`.
+
+Feature còn thiếu ở skeleton, sẽ thêm theo lộ trình: `user`, `review`, `feedback`,
+`favorite`, `visit`, `media`, `notification`, `chat`.
 
 ---
 
@@ -91,10 +167,11 @@ Module còn thiếu ở skeleton, sẽ thêm theo lộ trình: `user`, `review`,
 
 | Thư mục | Chạy ở đâu | Nội dung |
 |---|---|---|
-| `db/migration/` | mọi môi trường | Lược đồ + dữ liệu tham chiếu (danh mục món ăn) |
-| `db/dev-data/` | **chỉ profile `local`** | Địa điểm mẫu để thử API |
+| `core/src/main/resources/db/migration/` | mọi môi trường | Lược đồ + dữ liệu tham chiếu (danh mục món ăn) |
+| `core/src/main/resources/db/dev-data/` | **chỉ profile `local`** | Địa điểm mẫu để thử API |
 
-`db/dev-data` được nạp nhờ `spring.flyway.locations` trong `application-local.yml`.
+Migration nằm ở `core` nhưng **chỉ `app-public` chạy chúng**. `db/dev-data` được nạp nhờ
+`spring.flyway.locations` trong `app-public/src/main/resources/application-local.yml`.
 Profile `test` cố ý **không** nạp nó — test khẳng định trên lược đồ sạch.
 
 ---
@@ -115,4 +192,14 @@ khỏi hợp đồng. Chạy subagent `api-contract-guard` để kiểm tra.
   Không dùng H2 — H2 không có PostGIS nên test địa lý sẽ vô nghĩa.
 - `PostgreSQLContainer` trong Testcontainers 1.21+ là **không generic** — viết
   `new PostgreSQLContainer(image)`, không phải `new PostgreSQLContainer<>(image)`.
+- **Đừng khai lại `TestcontainersConfiguration`** trong app module. Nó nằm ở
+  `core/src/testFixtures` và dùng chung; khai lại là cách nhanh nhất để hai app trôi
+  khỏi nhau (một bên nâng image PostGIS, bên kia thì không). Dùng bằng:
+  `testImplementation(testFixtures(project(":core")))` — đã có sẵn ở cả hai app module.
+- Spring Boot 4 **dời** `AutoConfigureMockMvc`: package đúng là
+  `org.springframework.boot.webmvc.test.autoconfigure`, không phải
+  `org.springframework.boot.test.autoconfigure.web.servlet` như Boot 3.
 - Mỗi endpoint mới cần tối thiểu: happy path, lỗi validation, và phân quyền (403).
+- Endpoint quản trị cần thêm một khẳng định: `app-admin` **không** phục vụ đường dẫn
+  của người dùng cuối. Xem `AdminApplicationTests` — mất tính chất đó thì việc tách
+  hai tiến trình không còn ý nghĩa.
