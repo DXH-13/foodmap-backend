@@ -1,0 +1,22 @@
+# Máy lập trình viên. Hạ tầng chạy bằng infra/docker-compose.yml ở repo cha.
+# Cổng lệch chuẩn (5433, 6380, 9002) để không đụng dịch vụ khác trên máy.
+
+spring:
+  flyway:
+    # Chỉ ở local mới nạp thêm dữ liệu MẪU (địa điểm giả để thử API).
+    # dev và prod chỉ dùng classpath:db/migration.
+    locations:
+      - classpath:db/migration
+      - classpath:db/dev-data
+
+logging:
+  level:
+    com.foodmap: DEBUG
+    org.hibernate.SQL: DEBUG
+    # Bật dòng dưới khi cần xem giá trị tham số bind vào câu SQL
+    # org.hibernate.orm.jdbc.bind: TRACE
+
+management:
+  endpoint:
+    health:
+      show-details: always

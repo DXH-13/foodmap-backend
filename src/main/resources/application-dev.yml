@@ -1,0 +1,11 @@
+# Môi trường tích hợp nội bộ.
+
+foodmap:
+  cors:
+    allowed-origins:
+      - https://admin-dev.foodmap.vn
+
+logging:
+  level:
+    root: INFO
+    com.foodmap: DEBUG

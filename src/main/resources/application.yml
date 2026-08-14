@@ -1,0 +1,122 @@
+spring:
+  application:
+    name: foodmap-backend
+
+  profiles:
+    default: local
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${POSTGRES_DB:foodmap}
+    username: ${POSTGRES_USER:foodmap}
+    password: ${POSTGRES_PASSWORD:foodmap}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 5000
+
+  jpa:
+    # Lược đồ do Flyway quản lý. KHÔNG bao giờ đổi thành update hay create.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 30
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      timeout: 2s
+
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+  # Cố ý KHÔNG chỉnh Jackson: mặc định của Boot đã trả thời gian dạng ISO-8601,
+  # và giữ nguyên field null trong JSON. Hợp đồng API khai nhiều field `nullable`,
+  # nên field null phải CÓ MẶT với giá trị null chứ không được biến mất.
+
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  health:
+    redis:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+foodmap:
+  jwt:
+    # ⚠️ Bắt buộc override ở mọi môi trường ngoài local. Sinh bằng: openssl rand -base64 48
+    secret: ${JWT_SECRET:doi-gia-tri-nay-thanh-chuoi-ngau-nhien-it-nhat-32-ky-tu}
+    access-token-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:15}
+    refresh-token-ttl-days: ${JWT_REFRESH_TTL_DAYS:30}
+    issuer: foodmap
+
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:8081
+
+  geo:
+    default-radius-meters: 2000
+    min-radius-meters: 100
+    max-radius-meters: 50000
+    # Bán kính tối đa cho phép ghi nhận một lượt đến (FR-VISIT-02)
+    visit-max-distance-meters: 200
+
+  storage:
+    endpoint: ${S3_ENDPOINT:http://localhost:9002}
+    region: ${S3_REGION:us-east-1}
+    bucket: ${S3_BUCKET:foodmap-media}
+    access-key: ${S3_ACCESS_KEY:minioadmin}
+    secret-key: ${S3_SECRET_KEY:minioadmin}
+    path-style-access: ${S3_PATH_STYLE_ACCESS:true}
+
+  chat:
+    api-key: ${ANTHROPIC_API_KEY:}
+    model: ${ANTHROPIC_MODEL:claude-opus-5}
+    max-messages-per-hour: 30
+
+logging:
+  level:
+    root: INFO
+    com.foodmap: DEBUG

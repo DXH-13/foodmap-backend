@@ -1,0 +1,19 @@
+# Profile dùng cho test. Cố ý KHÔNG nạp db/dev-data — test khẳng định trên lược đồ sạch,
+# không phụ thuộc dữ liệu mẫu. Datasource và Redis do Testcontainers cấp qua @ServiceConnection.
+
+spring:
+  flyway:
+    locations:
+      - classpath:db/migration
+
+foodmap:
+  jwt:
+    secret: chuoi-bi-mat-chi-dung-cho-test-it-nhat-32-ky-tu-de-jjwt-chap-nhan
+  chat:
+    api-key: test-key-khong-goi-that
+
+logging:
+  level:
+    root: WARN
+    com.foodmap: INFO
+    org.testcontainers: INFO
