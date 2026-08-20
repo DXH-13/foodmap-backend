@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * Cấu hình spec sinh từ code, phơi ở {@code /v3/api-docs}.
  *
  * <p>Spec này <b>không</b> phải hợp đồng — hợp đồng là
- * {@code docs/03-api/openapi.yaml}. Nó tồn tại để <b>đối chiếu</b>: lệch nhau nghĩa là
+ * {@code docs/SDD/api/openapi.yaml}. Nó tồn tại để <b>đối chiếu</b>: lệch nhau nghĩa là
  * code đã trôi khỏi hợp đồng. Xem subagent {@code api-contract-guard}.
  */
 @Configuration
@@ -28,7 +28,7 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("""
                                 Spec này được sinh từ mã nguồn để đối chiếu với hợp đồng \
-                                docs/03-api/openapi.yaml. Hợp đồng mới là nguồn sự thật."""))
+                                docs/SDD/api/openapi.yaml. Hợp đồng mới là nguồn sự thật."""))
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME,
                         new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)

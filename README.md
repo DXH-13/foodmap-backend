@@ -62,8 +62,8 @@ src/main/resources/db/dev-data/     địa điểm mẫu (CHỈ profile local)
 
 | Nội dung | Ở đâu |
 |---|---|
-| Hợp đồng API | `docs/03-api/openapi.yaml` (submodule `docs`) |
-| Yêu cầu | `docs/01-srs/srs.md` |
-| Lược đồ dữ liệu | `docs/04-data/erd.md` |
-| Truy vấn địa lý | `docs/04-data/geo-model.md` |
+| Hợp đồng API | `docs/SDD/api/openapi.yaml` (submodule `docs`) |
+| Yêu cầu | `docs/SRS/srs.md` |
+| Lược đồ dữ liệu | `docs/SDD/du-lieu/erd.md` |
+| Truy vấn địa lý | `docs/SDD/du-lieu/geo-model.md` |
 | Quy ước code | [`CLAUDE.md`](./CLAUDE.md) và skill `spring-backend` ở repo cha |

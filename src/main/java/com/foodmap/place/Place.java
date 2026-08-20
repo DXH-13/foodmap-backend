@@ -20,7 +20,7 @@ import java.util.UUID;
  *
  * <p>Bốn cột đếm ({@code averageRating}, {@code reviewCount}, {@code visitCount},
  * {@code distinctVisitorCount}) là <b>dữ liệu dẫn xuất</b>, tính sẵn để tránh truy vấn
- * tổng hợp ở mỗi lần đọc. Xem docs/04-data/erd.md để biết khi nào chúng được tính lại.
+ * tổng hợp ở mỗi lần đọc. Xem docs/SDD/du-lieu/erd.md để biết khi nào chúng được tính lại.
  */
 @Entity
 @Table(name = "places")

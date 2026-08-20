@@ -11,7 +11,7 @@ import org.locationtech.jts.geom.PrecisionModel;
  * <p><b>Đây là nơi duy nhất được phép gọi {@code new Coordinate(...)} cho toạ độ địa lý.</b>
  * PostGIS nhận <b>kinh độ trước, vĩ độ sau</b> — ngược với cách người ta thường đọc.
  * Rải phép chuyển đổi này khắp codebase là bảo đảm sẽ có chỗ viết nhầm thứ tự,
- * và điểm sẽ rơi ra giữa đại dương. Xem docs/04-data/geo-model.md.
+ * và điểm sẽ rơi ra giữa đại dương. Xem docs/SDD/du-lieu/geo-model.md.
  */
 public final class GeoUtils {
 

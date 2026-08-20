@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * Hình dạng lỗi thống nhất cho toàn bộ API. Khớp với schema {@code ApiError}
- * trong docs/03-api/openapi.yaml.
+ * trong docs/SDD/api/openapi.yaml.
  *
  * @param code    mã lỗi ổn định, SCREAMING_SNAKE_CASE. <b>Không dịch</b> —
  *                client so sánh bằng mã này, không bằng {@code message}.

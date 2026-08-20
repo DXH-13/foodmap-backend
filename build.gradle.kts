@@ -47,7 +47,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 
-    // ── Sinh spec từ code, để đối chiếu với docs/03-api/openapi.yaml ──
+    // ── Sinh spec từ code, để đối chiếu với docs/SDD/api/openapi.yaml ──
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
 
     // ── Lưu media: MinIO ở dev, S3 ở prod (cùng API) ──

@@ -18,7 +18,7 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
     /**
      * Tìm địa điểm quanh một toạ độ, sắp xếp theo khoảng cách tăng dần.
      *
-     * <p>Ba điểm quan trọng, đừng sửa nếu chưa đọc docs/04-data/geo-model.md:
+     * <p>Ba điểm quan trọng, đừng sửa nếu chưa đọc docs/SDD/du-lieu/geo-model.md:
      * <ul>
      *   <li>{@code ST_DWithin} dùng được index GiST. Viết
      *       {@code ST_Distance(...) < :radius} trong {@code WHERE} thì <b>không</b> —

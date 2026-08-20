@@ -8,7 +8,7 @@ import java.util.UUID;
 
 /**
  * Địa điểm ở dạng rút gọn, dùng cho danh sách và marker trên bản đồ.
- * Khớp schema {@code PlaceSummary} trong docs/03-api/openapi.yaml.
+ * Khớp schema {@code PlaceSummary} trong docs/SDD/api/openapi.yaml.
  */
 @Schema(description = "Địa điểm ở dạng rút gọn")
 public record PlaceSummaryDto(

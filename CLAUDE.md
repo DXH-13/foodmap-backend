@@ -101,7 +101,7 @@ Profile `test` cố ý **không** nạp nó — test khẳng định trên lư�
 
 ## Hợp đồng API
 
-`docs/03-api/openapi.yaml` (submodule `docs` ở repo cha) là **nguồn sự thật**.
+`docs/SDD/api/openapi.yaml` (submodule `docs` ở repo cha) là **nguồn sự thật**.
 Backend implement theo nó, không ngược lại.
 
 Spec sinh từ code ở `/v3/api-docs` chỉ để **đối chiếu** — lệch nhau nghĩa là code đã trôi

@@ -33,7 +33,7 @@ public record FoodmapProperties(
     public record Cors(List<String> allowedOrigins) {}
 
     /**
-     * Ràng buộc địa lý. Xem docs/04-data/geo-model.md.
+     * Ràng buộc địa lý. Xem docs/SDD/du-lieu/geo-model.md.
      */
     public record Geo(
             @Min(1) int defaultRadiusMeters,
