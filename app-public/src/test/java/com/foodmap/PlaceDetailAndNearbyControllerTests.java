@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -14,6 +15,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -104,6 +107,48 @@ class PlaceDetailAndNearbyControllerTests {
                 .andExpect(jsonPath("$.isOpenNow").value((Object) null))
                 .andExpect(jsonPath("$.openingHours.length()").value(0))
                 .andExpect(jsonPath("$.images.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("Chi tiết trả externalLinks theo display_order, đủ trường; không có liên kết thì []")
+    void detailExternalLinks() throws Exception {
+        UUID place = TestData.place(jdbc, "PUBLISHED", "Quán có link", null, null, 0);
+        UUID noLinks = TestData.place(jdbc, "PUBLISHED", "Quán không link", null, null, 0);
+        // Chèn ngược thứ tự để chắc chắn sắp theo display_order chứ không theo thứ tự chèn
+        jdbc.update("""
+                INSERT INTO place_external_links (place_id, platform, url, title, display_order)
+                VALUES (?, 'YOUTUBE', 'https://www.youtube.com/results?search_query=x', NULL, 2),
+                       (?, 'TIKTOK', 'https://www.tiktok.com/search?q=x', 'Kênh review', 0),
+                       (?, 'FACEBOOK', 'https://www.facebook.com/search/top?q=x', NULL, 1)
+                """, place, place, place);
+
+        mockMvc.perform(get("/api/v1/places/" + place))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.externalLinks.length()").value(3))
+                .andExpect(jsonPath("$.externalLinks[*].platform", contains("TIKTOK", "FACEBOOK", "YOUTUBE")))
+                .andExpect(jsonPath("$.externalLinks[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.externalLinks[0].url").value("https://www.tiktok.com/search?q=x"))
+                .andExpect(jsonPath("$.externalLinks[0].title").value("Kênh review"))
+                .andExpect(jsonPath("$.externalLinks[1].title").value((Object) null));
+
+        mockMvc.perform(get("/api/v1/places/" + noLinks))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.externalLinks").isArray())
+                .andExpect(jsonPath("$.externalLinks.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("DB chặn liên kết không phải https:// và nền tảng ngoài enum")
+    void externalLinkConstraints() {
+        UUID place = TestData.place(jdbc, "PUBLISHED", "Quán ràng buộc", null, null, 0);
+        String sql = "INSERT INTO place_external_links (place_id, platform, url) VALUES (?, ?, ?)";
+
+        assertThatThrownBy(() -> jdbc.update(sql, place, "TIKTOK", "http://www.tiktok.com/search?q=x"))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("place_external_links_url_https_check");
+        assertThatThrownBy(() -> jdbc.update(sql, place, "ZALO", "https://zalo.me/x"))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("place_external_links_platform_check");
     }
 
     @Test

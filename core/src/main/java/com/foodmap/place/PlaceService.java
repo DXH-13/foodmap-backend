@@ -11,6 +11,7 @@ import com.foodmap.media.dto.MediaDto;
 import com.foodmap.place.dto.CoordinatesDto;
 import com.foodmap.place.dto.OpeningHourRangeDto;
 import com.foodmap.place.dto.PlaceDetailDto;
+import com.foodmap.place.dto.PlaceExternalLinkDto;
 import com.foodmap.place.dto.PlaceSummaryDto;
 import com.foodmap.visit.VisitService;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -147,6 +148,18 @@ public class PlaceService {
                         null))
                 .list();
 
+        List<PlaceExternalLinkDto> externalLinks = jdbc.sql("""
+                        SELECT id, platform, url, title FROM place_external_links
+                        WHERE place_id = :placeId ORDER BY display_order, created_at
+                        """)
+                .param("placeId", placeId)
+                .query((rs, n) -> new PlaceExternalLinkDto(
+                        rs.getObject("id", UUID.class),
+                        rs.getString("platform"),
+                        rs.getString("url"),
+                        rs.getString("title")))
+                .list();
+
         // Chưa có giờ mở cửa: không biết, trả null chứ không đoán là đóng.
         // Tạm hoặc đã đóng hẳn: đang đóng và không có "mở cửa lúc nào tiếp theo".
         LocalDateTime now = LocalDateTime.now(VIETNAM);
@@ -184,6 +197,7 @@ public class PlaceService {
                 nextOpenAt,
                 hours.stream().map(PlaceService::toDto).toList(),
                 images,
+                externalLinks,
                 favorited,
                 userId == null ? null : visitService.countOwnAtPlace(userId, placeId),
                 row.getCreatedAt());

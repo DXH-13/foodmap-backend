@@ -36,6 +36,8 @@ public record PlaceDetailDto(
         Instant nextOpenAt,
         List<OpeningHourRangeDto> openingHours,
         List<MediaDto> images,
+        @Schema(description = "Theo displayOrder; rỗng khi chưa có")
+        List<PlaceExternalLinkDto> externalLinks,
         @Schema(description = "Chỉ có giá trị khi người gọi đã đăng nhập")
         Boolean isFavorited,
         @Schema(description = "Số lượt đến của chính người gọi; chỉ có khi đã đăng nhập")
