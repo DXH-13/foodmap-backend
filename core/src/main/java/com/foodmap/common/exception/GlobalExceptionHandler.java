@@ -12,8 +12,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.List;
@@ -61,6 +64,20 @@ public class GlobalExceptionHandler {
                         translate("common.error.validation"),
                         details,
                         newTraceId()));
+    }
+
+    /**
+     * Lỗi ở tham số query/path: sai kiểu (enum lạ, chữ thay cho số), vi phạm {@code @Min}/{@code @Size},
+     * thiếu tham số bắt buộc. Không bắt riêng thì chúng rơi xuống lưới an toàn và thành 500.
+     */
+    @ExceptionHandler({
+            HandlerMethodValidationException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class})
+    public ResponseEntity<ApiError> handleInvalidParameter(Exception ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(ApiError.of("VALIDATION_FAILED", translate("common.error.validation"), newTraceId()));
     }
 
     @ExceptionHandler(AuthenticationException.class)

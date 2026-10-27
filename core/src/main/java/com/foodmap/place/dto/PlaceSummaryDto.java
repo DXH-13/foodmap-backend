@@ -1,9 +1,11 @@
 package com.foodmap.place.dto;
 
+import com.foodmap.category.dto.CategoryDto;
 import com.foodmap.place.PlaceSummaryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -23,11 +25,14 @@ public record PlaceSummaryDto(
         BigDecimal averageRating,
         int reviewCount,
         long visitCount,
+        String coverImageUrl,
         @Schema(description = "Chỉ có mặt ở kết quả tìm theo vị trí")
-        Double distanceMeters
+        Double distanceMeters,
+        List<CategoryDto> categories
 ) {
 
-    public static PlaceSummaryDto from(PlaceSummaryProjection row) {
+    public static PlaceSummaryDto from(PlaceSummaryProjection row, String coverImageUrl, List<CategoryDto> categories) {
+        Double distance = row.getDistanceMeters();
         return new PlaceSummaryDto(
                 row.getId(),
                 row.getSlug(),
@@ -39,7 +44,9 @@ public record PlaceSummaryDto(
                 row.getAverageRating(),
                 row.getReviewCount(),
                 row.getVisitCount(),
-                // Làm tròn tới mét — độ chính xác dưới mét không có ý nghĩa với người dùng
-                Math.round(row.getDistanceMeters() * 10.0) / 10.0);
+                coverImageUrl,
+                // Làm tròn tới 0,1 mét — độ chính xác hơn thế không có ý nghĩa với người dùng
+                distance == null ? null : Math.round(distance * 10.0) / 10.0,
+                categories);
     }
 }

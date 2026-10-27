@@ -16,7 +16,7 @@ public enum PlaceStatus {
     /** Tạm đóng cửa — vẫn hiển thị công khai kèm nhãn. */
     TEMPORARILY_CLOSED,
 
-    /** Đã đóng cửa vĩnh viễn — không hiển thị ở API công khai. */
+    /** Đã đóng cửa vĩnh viễn — không xuất hiện ở danh sách/tìm kiếm, nhưng trang chi tiết vẫn mở được kèm nhãn. */
     PERMANENTLY_CLOSED;
 
     /** Các trạng thái được phép xuất hiện ở API công khai (FR-PLACE-09). */

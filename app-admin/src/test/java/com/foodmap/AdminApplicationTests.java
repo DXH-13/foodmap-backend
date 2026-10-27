@@ -7,12 +7,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 // Spring Boot 4 dời lớp này khỏi `org.springframework.boot.test.autoconfigure.web.servlet`
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -56,6 +59,18 @@ class AdminApplicationTests {
     void adminApiRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/admin/users"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Trang quản trị đăng nhập được qua tiến trình này")
+    void loginIsServedHere() throws Exception {
+        // Cả hai trường hợp đều là 401, nên phải so `code`: bị denyAll() chặn thì ra
+        // UNAUTHORIZED, còn tới được AuthController thì ra INVALID_CREDENTIALS.
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"khongtontai@example.com\",\"password\":\"matkhau123\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
     }
 
     @Test

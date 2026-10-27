@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Kết quả thô của truy vấn tìm quanh đây.
+ * Kết quả thô của các truy vấn trả về {@code PlaceSummary} (quanh đây, từ khoá, yêu thích).
  *
  * <p>Dùng projection thay vì nạp cả entity: truy vấn này chạy ở mỗi lần người dùng
  * mở app hoặc di chuyển bản đồ, nên chỉ lấy đúng những cột cần hiển thị.
@@ -35,5 +35,9 @@ public interface PlaceSummaryProjection {
 
     double getLongitude();
 
-    double getDistanceMeters();
+    /** Khoá object của ảnh bìa, {@code null} khi chưa có. */
+    String getCoverKey();
+
+    /** {@code null} khi truy vấn không tính theo vị trí. */
+    Double getDistanceMeters();
 }

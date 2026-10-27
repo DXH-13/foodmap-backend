@@ -8,6 +8,9 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/dev-data
+    # Dữ liệu mẫu đánh số từ V900, nên mọi migration thật thêm sau (V3, V4…) đều có số NHỎ hơn
+    # bản đã chạy trên CSDL local. Không bật out-of-order thì Flyway từ chối khởi động.
+    out-of-order: true
 
 logging:
   level:

@@ -28,6 +28,7 @@ public class PublicSecurityConfig {
     private static final String[] PUBLIC_GET = {
             "/api/v1/places/**",
             "/api/v1/categories",
+            "/api/v1/reviews/feed",
             "/actuator/health",
             "/actuator/health/**",
             "/actuator/info",
