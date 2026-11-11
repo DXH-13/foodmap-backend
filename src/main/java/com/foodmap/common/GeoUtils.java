@@ -49,6 +49,24 @@ public final class GeoUtils {
         return point.getX();
     }
 
+    /**
+     * Khoảng cách (mét) giữa hai toạ độ, công thức Haversine trên mặt cầu.
+     *
+     * <p>Đủ chính xác cho việc sắp xếp (ví dụ yêu thích theo khoảng cách). Khi cần
+     * độ chính xác tuyệt đối để ra quyết định (ví dụ check-in trong 200m), dùng
+     * PostGIS {@code ST_Distance} trên cột geography thay vì hàm này.
+     */
+    public static double distanceMeters(double latitude1, double longitude1,
+                                        double latitude2, double longitude2) {
+        final double earthRadiusMeters = 6_371_000;
+        double dLat = Math.toRadians(latitude2 - latitude1);
+        double dLng = Math.toRadians(longitude2 - longitude1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2))
+                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        return 2 * earthRadiusMeters * Math.asin(Math.sqrt(a));
+    }
+
     /** Toạ độ có nằm trong khung bao Việt Nam không. Dùng để cảnh báo dữ liệu nghi vấn. */
     public static boolean isWithinVietnam(double latitude, double longitude) {
         return latitude >= VN_MIN_LAT && latitude <= VN_MAX_LAT

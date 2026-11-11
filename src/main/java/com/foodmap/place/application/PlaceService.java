@@ -1,15 +1,23 @@
 package com.foodmap.place.application;
 
 import com.foodmap.common.BadRequestException;
+import com.foodmap.common.NotFoundException;
 import com.foodmap.common.PageResponse;
 import com.foodmap.place.PlaceGeoProperties;
 import com.foodmap.place.api.PlaceApi;
+import com.foodmap.place.api.PlaceDetails;
+import com.foodmap.place.api.PlaceSummary;
+import com.foodmap.place.domain.Place;
 import com.foodmap.place.infrastructure.PlaceRepository;
 import com.foodmap.place.web.dto.PlaceSummaryDto;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PlaceService implements PlaceApi {
@@ -31,6 +39,65 @@ public class PlaceService implements PlaceApi {
     @Override
     public boolean existsById(java.util.UUID placeId) {
         return placeRepository.findByIdAndDeletedAtIsNull(placeId).isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PlaceDetails getPlace(UUID placeId) {
+        String locale = LocaleContextHolder.getLocale().getLanguage();
+        return placeRepository.findDetailsById(placeId, locale)
+                .map(row -> new PlaceDetails(
+                        row.getId(), row.getName(), row.getLatitude(), row.getLongitude(), row.getStatus()))
+                .orElseThrow(() -> new NotFoundException("PLACE_NOT_FOUND", "place.error.not_found"));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public double distanceMetersTo(UUID placeId, double latitude, double longitude) {
+        return placeRepository.distanceMetersTo(placeId, latitude, longitude)
+                .orElseThrow(() -> new NotFoundException("PLACE_NOT_FOUND", "place.error.not_found"));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PlaceSummary> getSummaries(List<UUID> placeIds, String locale) {
+        if (placeIds == null || placeIds.isEmpty()) {
+            return List.of();
+        }
+        return placeRepository.findSummariesByIds(placeIds, locale).stream()
+                .map(row -> new PlaceSummary(
+                        row.getId(), row.getSlug(), row.getName(), row.getPlaceType(),
+                        row.getLatitude(), row.getLongitude(), row.getAddress(), row.getStatus(),
+                        row.getAverageRating(), row.getReviewCount(), row.getVisitCount()))
+                .toList();
+    }
+
+    /**
+     * Áp dụng số liệu đánh giá do module {@code review} tính từ dữ liệu của nó.
+     * Chỉ cập nhật 2 cột dẫn xuất, không đụng tới phần còn lại của địa điểm.
+     */
+    @Transactional
+    @Override
+    public void updateRatingStats(UUID placeId, BigDecimal averageRating, int reviewCount) {
+        Place place = requirePlace(placeId);
+        place.setAverageRating(averageRating);
+        place.setReviewCount(reviewCount);
+        placeRepository.save(place);
+    }
+
+    /** Áp dụng số liệu ghé thăm do module {@code visit} tính từ dữ liệu của nó. */
+    @Transactional
+    @Override
+    public void updateVisitStats(UUID placeId, long visitCount, long distinctVisitorCount) {
+        Place place = requirePlace(placeId);
+        place.setVisitCount(visitCount);
+        place.setDistinctVisitorCount(distinctVisitorCount);
+        placeRepository.save(place);
+    }
+
+    private Place requirePlace(UUID placeId) {
+        return placeRepository.findByIdAndDeletedAtIsNull(placeId)
+                .orElseThrow(() -> new NotFoundException("PLACE_NOT_FOUND", "place.error.not_found"));
     }
 
     /**

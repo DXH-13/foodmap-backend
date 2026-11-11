@@ -31,6 +31,11 @@ dependencies {
     // Spring Boot 4.1.0 KHÔNG quản lý version cho Modulith (không có trong BOM),
     // nên pin tay: 2.1.2 là bản ổn định mới nhất của dòng 2.1 (cho Boot 4 / Framework 7).
     implementation("org.springframework.modulith:spring-modulith-starter-core:$springModulithVersion")
+    // ── Spring Modulith: hộp thư đi (outbox) cho sự kiện giữa các module (Bước 4) ──
+    // starter-jpa ghi mỗi sự kiện vào bảng event_publication trong cùng transaction
+    // với thay đổi nghiệp vụ (xem V3__modulith_event_publication.sql). Cần có vì
+    // Hibernate đang ở ddl-auto: validate — thiếu bảng là app không khởi động được.
+    implementation("org.springframework.modulith:spring-modulith-starter-jpa:$springModulithVersion")
     // ModulithTest import org.springframework.modulith.core.ApplicationModules, nhưng
     // starter-core khai spring-modulith-core ở scope runtime (chỉ có lúc chạy, không
     // có lúc biên dịch) nên test không biên dịch được. Thêm trực tiếp ở testImplementation

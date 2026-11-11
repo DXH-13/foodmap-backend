@@ -1,7 +1,9 @@
 package com.foodmap.place.infrastructure;
 
 import com.foodmap.place.domain.Place;
+import com.foodmap.place.domain.PlaceDetailsRow;
 import com.foodmap.place.domain.PlaceSummaryProjection;
+import com.foodmap.place.domain.PlaceSummaryRow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -74,4 +76,62 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
                                             @Param("radiusMeters") int radiusMeters,
                                             @Param("locale") String locale,
                                             Pageable pageable);
+
+    /**
+     * Thông tin tối thiểu của một địa điểm cho module khác (đánh giá, ghé thăm).
+     * Tên lấy theo {@code :locale}, thiếu thì lùi về bản tiếng Việt.
+     */
+    @Query(value = """
+            SELECT p.id                                        AS id,
+                   COALESCE(t.name, tvi.name)                  AS name,
+                   ST_Y(CAST(p.location AS geometry))          AS latitude,
+                   ST_X(CAST(p.location AS geometry))          AS longitude,
+                   p.status                                    AS status
+            FROM places p
+            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            WHERE p.id = :id AND p.deleted_at IS NULL
+            """,
+            nativeQuery = true)
+    Optional<PlaceDetailsRow> findDetailsById(@Param("id") UUID id, @Param("locale") String locale);
+
+    /**
+     * Khoảng cách (mét) từ một toạ độ tới địa điểm, tính bằng PostGIS trên cột
+     * geography. Dùng cho luật check-in trong 200m (FR-VISIT-02).
+     */
+    @Query(value = """
+            SELECT ST_Distance(p.location,
+                    CAST(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326) AS geography))
+            FROM places p
+            WHERE p.id = :id AND p.deleted_at IS NULL
+            """,
+            nativeQuery = true)
+    Optional<Double> distanceMetersTo(@Param("id") UUID id,
+                                      @Param("lat") double latitude,
+                                      @Param("lng") double longitude);
+
+    /**
+     * Địa điểm rút gọn cho một danh sách id (danh sách yêu thích). Chỉ trả những
+     * địa điểm còn tồn tại; thứ tự trả về không đảm bảo.
+     */
+    @Query(value = """
+            SELECT p.id                                        AS id,
+                   p.slug                                      AS slug,
+                   p.place_type                                AS placeType,
+                   p.status                                    AS status,
+                   COALESCE(t.name, tvi.name)                  AS name,
+                   p.address                                   AS address,
+                   p.average_rating                            AS averageRating,
+                   p.review_count                              AS reviewCount,
+                   p.visit_count                               AS visitCount,
+                   ST_Y(CAST(p.location AS geometry))          AS latitude,
+                   ST_X(CAST(p.location AS geometry))          AS longitude
+            FROM places p
+            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            WHERE p.id IN :ids AND p.deleted_at IS NULL
+            """,
+            nativeQuery = true)
+    java.util.List<PlaceSummaryRow> findSummariesByIds(@Param("ids") java.util.List<UUID> ids,
+                                                       @Param("locale") String locale);
 }
