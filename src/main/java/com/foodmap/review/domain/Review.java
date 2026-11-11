@@ -29,8 +29,12 @@ public class Review extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    /** 1..5, khớp CHECK trên bảng. */
-    @Column(nullable = false)
+    /**
+     * 1..5, khớp CHECK trên bảng. Cột trong DB là SMALLINT, còn Java vẫn dùng
+     * int — Hibernate validate so kiểu SQL nên phải khai rõ columnDefinition,
+     * nếu không nó đòi INTEGER và fail lúc khởi động (CI bước 4).
+     */
+    @Column(nullable = false, columnDefinition = "smallint")
     private int rating;
 
     @Column
