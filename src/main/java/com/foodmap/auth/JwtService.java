@@ -1,6 +1,5 @@
 package com.foodmap.auth;
 
-import com.foodmap.config.props.FoodmapProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,8 +31,7 @@ public class JwtService {
     private final String issuer;
     private final Duration accessTokenTtl;
 
-    public JwtService(FoodmapProperties properties) {
-        FoodmapProperties.Jwt jwt = properties.jwt();
+    public JwtService(JwtProperties jwt) {
         this.key = Keys.hmacShaKeyFor(jwt.secret().getBytes(StandardCharsets.UTF_8));
         this.issuer = jwt.issuer();
         this.accessTokenTtl = Duration.ofMinutes(jwt.accessTokenTtlMinutes());

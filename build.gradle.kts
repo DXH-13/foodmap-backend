@@ -22,10 +22,16 @@ repositories {
 val jjwtVersion = "0.13.0"
 val mapstructVersion = "1.6.3"
 val springdocVersion = "3.1.0"
+val springModulithVersion = "2.1.2"
 val awsSdkVersion = "2.53.0"
 val anthropicVersion = "2.54.0"
 
 dependencies {
+    // ── Spring Modulith: ranh giới module (Bước 2, kiến trúc BE thống nhất) ──
+    // Spring Boot 4.1.0 KHÔNG quản lý version cho Modulith (không có trong BOM),
+    // nên pin tay: 2.1.2 là bản ổn định mới nhất của dòng 2.1 (cho Boot 4 / Framework 7).
+    implementation("org.springframework.modulith:spring-modulith-starter-core:$springModulithVersion")
+
     // ── Spring Boot ──
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-security")

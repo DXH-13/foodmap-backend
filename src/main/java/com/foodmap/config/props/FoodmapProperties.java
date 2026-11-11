@@ -1,7 +1,6 @@
 package com.foodmap.config.props;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,32 +15,12 @@ import java.util.List;
 @Validated
 @ConfigurationProperties(prefix = "foodmap")
 public record FoodmapProperties(
-        Jwt jwt,
         Cors cors,
-        Geo geo,
         Storage storage,
         Chat chat
 ) {
 
-    public record Jwt(
-            @NotBlank String secret,
-            @Min(1) int accessTokenTtlMinutes,
-            @Min(1) int refreshTokenTtlDays,
-            @NotBlank String issuer
-    ) {}
-
     public record Cors(List<String> allowedOrigins) {}
-
-    /**
-     * Ràng buộc địa lý. Xem docs/SDD/du-lieu/geo-model.md.
-     */
-    public record Geo(
-            @Min(1) int defaultRadiusMeters,
-            @Min(1) int minRadiusMeters,
-            @Min(1) int maxRadiusMeters,
-            /* Bán kính tối đa cho phép ghi nhận một lượt đến (FR-VISIT-02). */
-            @Min(1) int visitMaxDistanceMeters
-    ) {}
 
     public record Storage(
             String endpoint,
