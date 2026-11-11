@@ -3,6 +3,8 @@ package com.foodmap.review.domain;
 import com.foodmap.common.BaseEntity;
 import com.foodmap.review.api.ReviewStatus;
 import jakarta.persistence.Column;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -30,11 +32,16 @@ public class Review extends BaseEntity {
     private UUID userId;
 
     /**
-     * 1..5, khớp CHECK trên bảng. Cột trong DB là SMALLINT, còn Java vẫn dùng
-     * int — Hibernate validate so kiểu SQL nên phải khai rõ columnDefinition,
-     * nếu không nó đòi INTEGER và fail lúc khởi động (CI bước 4).
+     * 1..5, khớp CHECK trên bảng. Cột trong DB là SMALLINT nhưng Java vẫn dùng
+     * int — {@code @JdbcTypeCode(SMALLINT)} ép kiểu JDBC về SMALLINT để
+     * Hibernate validate pass. Chỉ khai {@code columnDefinition = "smallint"}
+     * là KHÔNG đủ: Postgres báo tên kiểu là "int2" chứ không phải "smallint",
+     * nên cả hai đường so sánh của Hibernate (mã kiểu INTEGER≠SMALLINT, tên
+     * kiểu "smallint"≠"int2") đều trượt — đó là lý do CI bước 4 vẫn đỏ sau
+     * lần sửa đầu.
      */
     @Column(nullable = false, columnDefinition = "smallint")
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     private int rating;
 
     @Column
