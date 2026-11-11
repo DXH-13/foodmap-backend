@@ -31,6 +31,11 @@ dependencies {
     // Spring Boot 4.1.0 KHÔNG quản lý version cho Modulith (không có trong BOM),
     // nên pin tay: 2.1.2 là bản ổn định mới nhất của dòng 2.1 (cho Boot 4 / Framework 7).
     implementation("org.springframework.modulith:spring-modulith-starter-core:$springModulithVersion")
+    // ModulithTest import org.springframework.modulith.core.ApplicationModules, nhưng
+    // starter-core khai spring-modulith-core ở scope runtime (chỉ có lúc chạy, không
+    // có lúc biên dịch) nên test không biên dịch được. Thêm trực tiếp ở testImplementation
+    // để test thấy được lớp đó; code chính không dùng Modulith nên không cần ở đó.
+    testImplementation("org.springframework.modulith:spring-modulith-core:$springModulithVersion")
 
     // ── Spring Boot ──
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
