@@ -10,12 +10,12 @@ import org.springframework.modulith.core.ApplicationModules;
  * import thẳng vào phần nội bộ của module khác, hoặc phụ thuộc vòng tròn) sẽ
  * làm đỏ build ngay khi nộp code, thay vì chờ tới khi hệ thống khó sửa.
  *
- * <p>Hiện tại chỉ module {@code place} được gói lại theo khuôn; các package
- * {@code auth}, {@code common}, {@code config} vẫn bị Modulith nhận diện
- * mặc định thành module (chúng là package con trực tiếp của {@code com.foodmap})
- * và ranh giới của chúng hiện đang vi phạm — xem ghi chú trong báo cáo Bước 2.
- * Chúng được siết dần ở các bước sau khi từng module được tách ra
- * (xem tài liệu kiến trúc, mục "Lộ trình").
+ * <p>Hiện tại các package {@code common} và {@code config} vẫn được Modulith nhận
+ * diện mặc định thành module (chúng là package con trực tiếp của {@code com.foodmap})
+ * — ranh giới của chúng được giữ bằng cách chỉ cho module khác dùng type ở package
+ * gốc (ví dụ exception ở {@code com.foodmap.common}) hoặc qua {@code api/}.
+ * Module {@code place} (Bước 2) và {@code identity} / {@code user} (Bước 3) đã
+ * được gói theo khuôn.
  */
 class ModulithTest {
 

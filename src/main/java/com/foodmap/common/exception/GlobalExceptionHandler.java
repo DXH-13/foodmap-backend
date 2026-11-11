@@ -1,6 +1,7 @@
 package com.foodmap.common.exception;
 
 import com.foodmap.common.ApiError;
+import com.foodmap.common.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.List;
@@ -75,6 +78,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiError.of("FORBIDDEN", translate("common.error.forbidden"), newTraceId()));
+    }
+
+    /**
+     * Body JSON sai định dạng hoặc sai kiểu (ví dụ gửi chuỗi vào trường enum).
+     * Không có handler này, lỗi rơi xuống {@code handleUnexpected} và trả 500 —
+     * trong khi đây là lỗi của client, phải là 400.
+     */
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ApiError> handleBadRequest(Exception ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ApiError(
+                        "VALIDATION_FAILED",
+                        translate("common.error.validation"),
+                        null,
+                        newTraceId()));
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

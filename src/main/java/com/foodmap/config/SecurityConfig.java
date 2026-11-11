@@ -1,6 +1,6 @@
 package com.foodmap.config;
 
-import com.foodmap.auth.JwtAuthenticationFilter;
+import com.foodmap.identity.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

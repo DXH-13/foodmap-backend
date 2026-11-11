@@ -1,6 +1,5 @@
 package com.foodmap.common;
 
-import com.foodmap.common.exception.BusinessException;
 import org.springframework.http.HttpStatus;
 
 /** 400 — yêu cầu không hợp lệ về mặt nghiệp vụ (validation cú pháp đã qua). */
