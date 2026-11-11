@@ -30,8 +30,8 @@ public class SecurityConfig {
 
     /** Danh sách endpoint khách vãng lai truy cập được (FR-PLACE-01). */
     private static final String[] PUBLIC_GET = {
-            "/api/v1/places/**",
-            "/api/v1/categories",
+            "/app/v1/places/**",
+            "/app/v1/categories",
             "/actuator/health",
             "/actuator/health/**",
             "/actuator/info",
@@ -41,12 +41,12 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_POST = {
-            "/api/v1/auth/register",
-            "/api/v1/auth/login",
-            "/api/v1/auth/refresh",
-            "/api/v1/auth/forgot-password",
-            "/api/v1/auth/reset-password",
-            "/api/v1/auth/verify-email",
+            "/app/v1/auth/register",
+            "/app/v1/auth/login",
+            "/app/v1/auth/refresh",
+            "/app/v1/auth/forgot-password",
+            "/app/v1/auth/reset-password",
+            "/app/v1/auth/verify-email",
     };
 
     @Bean
@@ -68,7 +68,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET).permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST).permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasAnyRole("MODERATOR", "ADMIN")
+                        .requestMatchers("/admin/v1/**").hasAnyRole("MODERATOR", "ADMIN")
                         .anyRequest().authenticated())
                 // Chưa đăng nhập → 401; đã đăng nhập nhưng thiếu quyền → 403.
                 // Mặc định Spring Security trả 403 cho cả hai, khiến client không biết

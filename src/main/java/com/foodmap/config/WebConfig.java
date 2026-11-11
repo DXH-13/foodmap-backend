@@ -46,7 +46,11 @@ public class WebConfig {
         config.setMaxAge(Duration.ofHours(1));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        // Bước 1: hợp đồng tách thành /app/v1 (mobile) và /admin/v1 (admin).
+        // Đăng ký cả hai tiền tố — chỉ "/api/**" như trước sẽ không khớp
+        // đường dẫn mới và trình duyệt sẽ chặn gọi API vì CORS.
+        source.registerCorsConfiguration("/app/**", config);
+        source.registerCorsConfiguration("/admin/**", config);
         return source;
     }
 }
