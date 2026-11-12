@@ -20,7 +20,7 @@ import java.util.UUID;
  * Chỉ tham chiếu tới người dùng và địa điểm bằng mã định danh.
  */
 @Entity
-@Table(name = "favorites")
+@Table(name = "favorites", schema = "favorite")
 @EntityListeners(AuditingEntityListener.class)
 public class Favorite {
 

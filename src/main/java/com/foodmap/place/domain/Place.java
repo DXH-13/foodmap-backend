@@ -23,7 +23,7 @@ import java.util.UUID;
  * tổng hợp ở mỗi lần đọc. Xem docs/SDD/du-lieu/erd.md để biết khi nào chúng được tính lại.
  */
 @Entity
-@Table(name = "places")
+@Table(name = "places", schema = "place")
 public class Place extends BaseEntity {
 
     @Column(nullable = false)

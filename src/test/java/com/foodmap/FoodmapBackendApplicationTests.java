@@ -39,16 +39,21 @@ class FoodmapBackendApplicationTests {
     @Test
     @DisplayName("Flyway đã tạo đủ bảng và index không gian")
     void migrationsCreatedSchema() {
+        // Bước 6: mỗi module một schema — places/reviews/visits đã rời public,
+        // chỉ feedbacks (chưa có module) còn ở public.
         Integer placeTables = jdbc.queryForObject("""
                 SELECT count(*) FROM information_schema.tables
-                WHERE table_schema = 'public' AND table_name IN ('places', 'reviews', 'visits', 'feedbacks')
+                WHERE (table_schema = 'place' AND table_name = 'places')
+                   OR (table_schema = 'review' AND table_name = 'reviews')
+                   OR (table_schema = 'visit' AND table_name = 'visits')
+                   OR (table_schema = 'public' AND table_name = 'feedbacks')
                 """, Integer.class);
         assertThat(placeTables).isEqualTo(4);
 
         // Thiếu index GiST thì truy vấn tìm quanh đây sẽ quét toàn bảng (ADR-0003)
         Integer spatialIndex = jdbc.queryForObject("""
                 SELECT count(*) FROM pg_indexes
-                WHERE tablename = 'places' AND indexname = 'idx_places_location'
+                WHERE schemaname = 'place' AND tablename = 'places' AND indexname = 'idx_places_location'
                 """, Integer.class);
         assertThat(spatialIndex).isEqualTo(1);
     }
@@ -56,11 +61,11 @@ class FoodmapBackendApplicationTests {
     @Test
     @DisplayName("Dữ liệu tham chiếu danh mục đã được seed kèm bản dịch vi và en")
     void categoriesAreSeeded() {
-        Integer categories = jdbc.queryForObject("SELECT count(*) FROM categories", Integer.class);
+        Integer categories = jdbc.queryForObject("SELECT count(*) FROM place.categories", Integer.class);
         assertThat(categories).isEqualTo(13);
 
         Integer viNames = jdbc.queryForObject(
-                "SELECT count(*) FROM category_translations WHERE locale = 'vi'", Integer.class);
+                "SELECT count(*) FROM place.category_translations WHERE locale = 'vi'", Integer.class);
         assertThat(viNames).isEqualTo(13);
     }
 
@@ -72,7 +77,7 @@ class FoodmapBackendApplicationTests {
 
         String plan = String.join("\n", jdbc.queryForList("""
                 EXPLAIN
-                SELECT p.id FROM places p
+                SELECT p.id FROM place.places p
                 WHERE ST_DWithin(p.location,
                         CAST(ST_SetSRID(ST_MakePoint(106.6297, 10.8231), 4326) AS geography), 2000)
                 """, String.class));

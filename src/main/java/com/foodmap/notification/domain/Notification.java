@@ -31,7 +31,7 @@ import java.util.UUID;
  * của người nhận (xem {@code NotificationService}).
  */
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications", schema = "notification")
 @EntityListeners(AuditingEntityListener.class)
 public class Notification {
 

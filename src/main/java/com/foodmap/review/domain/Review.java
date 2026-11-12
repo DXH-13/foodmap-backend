@@ -22,7 +22,7 @@ import java.util.UUID;
  * đánh giá sau khi đã xoá bản cũ.
  */
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", schema = "review")
 public class Review extends BaseEntity {
 
     @Column(name = "place_id", nullable = false)

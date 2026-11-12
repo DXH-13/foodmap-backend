@@ -18,7 +18,7 @@ import java.time.Instant;
  * dạng hash BCrypt (60 ký tự) — không bao giờ lưu mật khẩu gốc.
  */
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "identity")
 public class User extends BaseEntity {
 
     @Column(nullable = false, length = 255)

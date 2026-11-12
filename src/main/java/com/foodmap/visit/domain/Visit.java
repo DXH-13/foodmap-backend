@@ -27,7 +27,7 @@ import java.util.UUID;
  * người / địa điểm / ngày.
  */
 @Entity
-@Table(name = "visits")
+@Table(name = "visits", schema = "visit")
 @EntityListeners(AuditingEntityListener.class)
 public class Visit {
 

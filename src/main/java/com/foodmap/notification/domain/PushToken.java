@@ -24,7 +24,7 @@ import java.util.UUID;
  * {@code NotificationService.registerPushToken}).
  */
 @Entity
-@Table(name = "push_tokens")
+@Table(name = "push_tokens", schema = "notification")
 @EntityListeners(AuditingEntityListener.class)
 public class PushToken {
 

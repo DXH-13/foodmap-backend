@@ -14,7 +14,7 @@ import java.time.Instant;
  * Dùng một lần: sau khi dùng thì đánh dấu {@code used_at}, dùng lại sẽ bị từ chối.
  */
 @Entity
-@Table(name = "email_verification_tokens")
+@Table(name = "email_verification_tokens", schema = "identity")
 public class EmailVerificationToken extends AbstractToken {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

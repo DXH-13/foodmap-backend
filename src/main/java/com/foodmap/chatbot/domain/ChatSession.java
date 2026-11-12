@@ -15,7 +15,7 @@ import java.util.UUID;
  * đối tượng sang entity của module {@code identity}.
  */
 @Entity
-@Table(name = "chat_sessions")
+@Table(name = "chat_sessions", schema = "chatbot")
 public class ChatSession extends BaseEntity {
 
     @Column(name = "user_id", nullable = false)

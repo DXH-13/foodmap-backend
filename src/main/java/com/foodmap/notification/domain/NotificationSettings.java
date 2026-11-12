@@ -25,7 +25,7 @@ import java.util.UUID;
  * cả các loại (xem {@code NotificationService.isTypeEnabled}).
  */
 @Entity
-@Table(name = "notification_settings")
+@Table(name = "notification_settings", schema = "notification")
 @EntityListeners(AuditingEntityListener.class)
 public class NotificationSettings {
 

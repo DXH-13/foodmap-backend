@@ -17,7 +17,7 @@ import java.time.Instant;
  * là dấu hiệu token bị đánh cắp — toàn bộ phiên của người dùng đó bị vô hiệu.
  */
 @Entity
-@Table(name = "refresh_tokens")
+@Table(name = "refresh_tokens", schema = "identity")
 public class RefreshToken extends AbstractToken {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -31,7 +31,7 @@ import java.util.UUID;
  * thẻ bấm mở — lưu JSONB, giống {@code Notification.payload} ở Bước 5.
  */
 @Entity
-@Table(name = "chat_messages")
+@Table(name = "chat_messages", schema = "chatbot")
 @EntityListeners(AuditingEntityListener.class)
 public class ChatMessage {
 

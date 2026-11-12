@@ -51,9 +51,9 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
                    ST_X(CAST(p.location AS geometry))          AS longitude,
                    ST_Distance(p.location,
                        CAST(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326) AS geography)) AS distanceMeters
-            FROM places p
-            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
-            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            FROM place.places p
+            LEFT JOIN place.place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place.place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
             WHERE p.deleted_at IS NULL
               AND p.status IN ('PUBLISHED', 'TEMPORARILY_CLOSED')
               AND ST_DWithin(p.location,
@@ -63,7 +63,7 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
             """,
             countQuery = """
             SELECT count(*)
-            FROM places p
+            FROM place.places p
             WHERE p.deleted_at IS NULL
               AND p.status IN ('PUBLISHED', 'TEMPORARILY_CLOSED')
               AND ST_DWithin(p.location,
@@ -101,9 +101,9 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
                    ST_Y(CAST(p.location AS geometry))          AS latitude,
                    ST_X(CAST(p.location AS geometry))          AS longitude,
                    0.0                                         AS distanceMeters
-            FROM places p
-            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
-            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            FROM place.places p
+            LEFT JOIN place.place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place.place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
             WHERE p.deleted_at IS NULL
               AND p.status IN ('PUBLISHED', 'TEMPORARILY_CLOSED')
               AND (f_unaccent(COALESCE(t.name, tvi.name)) ILIKE '%' || f_unaccent(:keyword) || '%'
@@ -112,9 +112,9 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
             """,
             countQuery = """
             SELECT count(*)
-            FROM places p
-            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
-            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            FROM place.places p
+            LEFT JOIN place.place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place.place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
             WHERE p.deleted_at IS NULL
               AND p.status IN ('PUBLISHED', 'TEMPORARILY_CLOSED')
               AND (f_unaccent(COALESCE(t.name, tvi.name)) ILIKE '%' || f_unaccent(:keyword) || '%'
@@ -135,9 +135,9 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
                    ST_Y(CAST(p.location AS geometry))          AS latitude,
                    ST_X(CAST(p.location AS geometry))          AS longitude,
                    p.status                                    AS status
-            FROM places p
-            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
-            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            FROM place.places p
+            LEFT JOIN place.place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place.place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
             WHERE p.id = :id AND p.deleted_at IS NULL
             """,
             nativeQuery = true)
@@ -150,7 +150,7 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
     @Query(value = """
             SELECT ST_Distance(p.location,
                     CAST(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326) AS geography))
-            FROM places p
+            FROM place.places p
             WHERE p.id = :id AND p.deleted_at IS NULL
             """,
             nativeQuery = true)
@@ -174,9 +174,9 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
                    p.visit_count                               AS visitCount,
                    ST_Y(CAST(p.location AS geometry))          AS latitude,
                    ST_X(CAST(p.location AS geometry))          AS longitude
-            FROM places p
-            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
-            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            FROM place.places p
+            LEFT JOIN place.place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place.place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
             WHERE p.id IN :ids AND p.deleted_at IS NULL
             """,
             nativeQuery = true)

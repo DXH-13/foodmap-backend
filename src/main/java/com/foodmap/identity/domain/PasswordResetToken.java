@@ -14,7 +14,7 @@ import java.time.Instant;
  * Dùng một lần: sau khi dùng thì đánh dấu {@code used_at}, dùng lại sẽ bị từ chối.
  */
 @Entity
-@Table(name = "password_reset_tokens")
+@Table(name = "password_reset_tokens", schema = "identity")
 public class PasswordResetToken extends AbstractToken {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
