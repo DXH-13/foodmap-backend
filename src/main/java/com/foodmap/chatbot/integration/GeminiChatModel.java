@@ -74,16 +74,27 @@ public class GeminiChatModel implements ChatModel {
         this.chat = chat;
     }
 
+    /**
+     * Constructor cho Spring: tự tạo {@link RestClient} bằng
+     * {@link RestClient#builder()} thay vì tiêm {@code RestClient.Builder}.
+     *
+     * <p>Spring Boot 4.1 KHÔNG còn tự tạo bean {@code RestClient.Builder}
+     * (không có {@code RestClientAutoConfiguration} trong Boot 4.1 — đã kiểm
+     * tra trong spring-boot-autoconfigure và spring-boot-webmvc 4.1.0),
+     * nên tiêm nó làm context khởi tạo thất bại với
+     * {@code NoSuchBeanDefinitionException} (CI run 43150401560).
+     * {@code RestClient.builder()} là factory tĩnh của Spring Framework,
+     * luôn có sẵn, không cần bean.
+     */
     @Autowired
-    public GeminiChatModel(RestClient.Builder restClientBuilder,
-                           ObjectMapper objectMapper,
+    public GeminiChatModel(ObjectMapper objectMapper,
                            ChatProperties properties) {
         this.objectMapper = objectMapper;
         this.chat = properties;
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(Duration.ofSeconds(10));
         requestFactory.setReadTimeout(Duration.ofSeconds(120));
-        this.restClient = restClientBuilder
+        this.restClient = RestClient.builder()
                 .baseUrl(chat.baseUrl())
                 .requestFactory(requestFactory)
                 .build();
