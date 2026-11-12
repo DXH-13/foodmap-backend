@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,6 +41,14 @@ public class PlaceService implements PlaceApi {
     @Override
     public boolean existsById(java.util.UUID placeId) {
         return placeRepository.findByIdAndDeletedAtIsNull(placeId).isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<UUID> findCreatorById(UUID placeId) {
+        return placeRepository.findByIdAndDeletedAtIsNull(placeId)
+                .map(Place::getCreatedBy)
+                .filter(Objects::nonNull);
     }
 
     @Transactional(readOnly = true)

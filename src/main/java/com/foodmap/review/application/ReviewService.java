@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -194,6 +195,14 @@ public class ReviewService implements ReviewApi {
         reviews.save(review);
         events.publishEvent(new ReviewModerated(review.getPlaceId(), review.getId(), target));
         return toDto(review, true);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<ReviewDetails> findReview(UUID reviewId) {
+        return reviews.findByIdAndDeletedAtIsNull(reviewId)
+                .map(review -> new ReviewDetails(
+                        review.getId(), review.getPlaceId(), review.getUserId(), review.getStatus()));
     }
 
     @Transactional(readOnly = true)

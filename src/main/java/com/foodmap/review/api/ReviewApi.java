@@ -1,5 +1,6 @@
 package com.foodmap.review.api;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -16,4 +17,18 @@ public interface ReviewApi {
      * (đánh giá chưa duyệt, bị từ chối, bị ẩn hay đã xoá mềm đều không tính).
      */
     ReviewStats statsForPlace(UUID placeId);
+
+    /**
+     * Thông tin tối thiểu của một đánh giá (địa điểm, tác giả, trạng thái) để
+     * module khác xử lý sự kiện — ví dụ {@code notification} ở Bước 5 cần biết
+     * tác giả là ai để báo kết quả kiểm duyệt, và báo chủ quán khi có đánh giá
+     * mới mà không tự báo cho chính tác giả.
+     *
+     * <p>Rỗng khi đánh giá không tồn tại hoặc đã xoá mềm.
+     */
+    Optional<ReviewDetails> findReview(UUID reviewId);
+
+    /** Bản ghi chỉ đọc của một đánh giá, dùng cho module khác qua {@code ReviewApi}. */
+    record ReviewDetails(UUID reviewId, UUID placeId, UUID authorId, ReviewStatus status) {
+    }
 }

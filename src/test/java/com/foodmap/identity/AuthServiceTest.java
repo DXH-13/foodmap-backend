@@ -66,7 +66,8 @@ class AuthServiceTest {
                 new com.foodmap.identity.JwtProperties(SECRET, 15, 30, "foodmap"));
         authService = new AuthService(users, refreshTokens, resetTokens, verificationTokens,
                 passwordEncoder, jwtService, emailService,
-                new com.foodmap.identity.JwtProperties(SECRET, 15, 30, "foodmap"));
+                new com.foodmap.identity.JwtProperties(SECRET, 15, 30, "foodmap"),
+                mock(org.springframework.context.ApplicationEventPublisher.class));
         // Giả lập JPA persist: save() gán id cho entity (ngoài đời CSDL làm việc này).
         when(users.save(any(User.class))).thenAnswer(invocation -> {
             User saved = invocation.getArgument(0);

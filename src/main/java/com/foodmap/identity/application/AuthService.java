@@ -13,11 +13,13 @@ import com.foodmap.identity.domain.PasswordResetToken;
 import com.foodmap.identity.domain.RefreshToken;
 import com.foodmap.identity.domain.TokenGenerator;
 import com.foodmap.identity.domain.User;
+import com.foodmap.identity.api.UserRegistered;
 import com.foodmap.identity.api.UserRole;
 import com.foodmap.identity.infrastructure.EmailVerificationTokenRepository;
 import com.foodmap.identity.infrastructure.PasswordResetTokenRepository;
 import com.foodmap.identity.infrastructure.RefreshTokenRepository;
 import com.foodmap.identity.infrastructure.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -63,6 +65,7 @@ public class AuthService implements IdentityApi {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final ApplicationEventPublisher events;
     private final Duration refreshTokenTtl;
 
     public AuthService(UserRepository users,
@@ -72,7 +75,8 @@ public class AuthService implements IdentityApi {
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        EmailService emailService,
-                       JwtProperties jwtProperties) {
+                       JwtProperties jwtProperties,
+                       ApplicationEventPublisher events) {
         this.users = users;
         this.refreshTokens = refreshTokens;
         this.resetTokens = resetTokens;
@@ -80,6 +84,7 @@ public class AuthService implements IdentityApi {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.events = events;
         this.refreshTokenTtl = Duration.ofDays(jwtProperties.refreshTokenTtlDays());
     }
 
@@ -106,6 +111,9 @@ public class AuthService implements IdentityApi {
                 displayName.trim(), locale);
         users.save(user);
 
+        // Phát trong cùng transaction với việc tạo tài khoản — outbox ghi lại,
+        // module notification nghe sau commit để gửi chào mừng (Bước 5).
+        events.publishEvent(new UserRegistered(user.getId(), user.getEmail()));
         issueVerificationEmail(user);
         return issueTokens(user);
     }

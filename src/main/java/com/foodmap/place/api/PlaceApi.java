@@ -2,6 +2,7 @@ package com.foodmap.place.api;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -30,6 +31,15 @@ public interface PlaceApi {
      * @throws com.foodmap.common.NotFoundException mã {@code PLACE_NOT_FOUND} khi không có.
      */
     PlaceDetails getPlace(UUID placeId);
+
+    /**
+     * Người đã tạo địa điểm (cột {@code created_by}), nếu có.
+     *
+     * <p>Rỗng khi địa điểm không tồn tại, đã xoá mềm, hoặc được tạo từ dữ liệu
+     * gốc mà không gắn người tạo (seed). Module {@code notification} ở Bước 5
+     * dùng để biết báo cho ai khi quán có đánh giá mới — chỉ đọc, không sửa.
+     */
+    Optional<UUID> findCreatorById(UUID placeId);
 
     /**
      * Khoảng cách (mét) từ một toạ độ tới địa điểm, tính bằng PostGIS trên cột
