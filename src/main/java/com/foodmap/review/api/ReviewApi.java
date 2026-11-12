@@ -1,5 +1,7 @@
 package com.foodmap.review.api;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +30,20 @@ public interface ReviewApi {
      */
     Optional<ReviewDetails> findReview(UUID reviewId);
 
+    /**
+     * Các đánh giá <b>đã duyệt</b> mới nhất của một địa điểm, cho tool
+     * {@code list_place_reviews} của chatbot ở Bước 5 — chatbot đọc đánh giá thật
+     * để trả lời thay vì tự bịa cảm nhận về quán.
+     *
+     * @param limit số kết quả tối đa, ép về khoảng 1..10.
+     */
+    List<ReviewSummary> listApprovedReviews(UUID placeId, int limit);
+
     /** Bản ghi chỉ đọc của một đánh giá, dùng cho module khác qua {@code ReviewApi}. */
     record ReviewDetails(UUID reviewId, UUID placeId, UUID authorId, ReviewStatus status) {
+    }
+
+    /** Đánh giá đã duyệt ở dạng rút gọn, dùng cho module khác qua {@code ReviewApi}. */
+    record ReviewSummary(UUID reviewId, int rating, String content, Instant createdAt) {
     }
 }

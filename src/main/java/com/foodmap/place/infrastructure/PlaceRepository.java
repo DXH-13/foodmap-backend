@@ -78,6 +78,54 @@ public interface PlaceRepository extends JpaRepository<Place, UUID> {
                                             Pageable pageable);
 
     /**
+     * Tìm địa điểm theo từ khoá trên tên và mô tả, không phân biệt hoa thường và
+     * không phân biệt dấu (dùng {@code f_unaccent} — xem V1, hàm đã bọc thành
+     * IMMUTABLE để dùng được trong index).
+     *
+     * <p>Thêm cho tool {@code search_places} của chatbot ở Bước 5. Từ khoá phải
+     * được escape ký tự {@code %}, {@code _}, {@code \} trước khi truyền vào
+     * (xem {@code PlaceService#searchByKeyword}) vì ILIKE xem chúng là ký tự
+     * đại diện. Chỉ trả địa điểm đang hiển thị công khai; {@code distanceMeters}
+     * luôn là 0 vì tìm theo từ khoá không có điểm gốc để đo khoảng cách.
+     */
+    @Query(value = """
+            SELECT p.id                                        AS id,
+                   p.slug                                      AS slug,
+                   p.place_type                                AS placeType,
+                   p.status                                    AS status,
+                   COALESCE(t.name, tvi.name)                  AS name,
+                   p.address                                   AS address,
+                   p.average_rating                            AS averageRating,
+                   p.review_count                              AS reviewCount,
+                   p.visit_count                               AS visitCount,
+                   ST_Y(CAST(p.location AS geometry))          AS latitude,
+                   ST_X(CAST(p.location AS geometry))          AS longitude,
+                   0.0                                         AS distanceMeters
+            FROM places p
+            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            WHERE p.deleted_at IS NULL
+              AND p.status IN ('PUBLISHED', 'TEMPORARILY_CLOSED')
+              AND (f_unaccent(COALESCE(t.name, tvi.name)) ILIKE '%' || f_unaccent(:keyword) || '%'
+                OR f_unaccent(COALESCE(t.description, tvi.description)) ILIKE '%' || f_unaccent(:keyword) || '%')
+            ORDER BY p.average_rating DESC NULLS LAST, p.review_count DESC
+            """,
+            countQuery = """
+            SELECT count(*)
+            FROM places p
+            LEFT JOIN place_translations t   ON t.place_id = p.id   AND t.locale = :locale
+            LEFT JOIN place_translations tvi ON tvi.place_id = p.id AND tvi.locale = 'vi'
+            WHERE p.deleted_at IS NULL
+              AND p.status IN ('PUBLISHED', 'TEMPORARILY_CLOSED')
+              AND (f_unaccent(COALESCE(t.name, tvi.name)) ILIKE '%' || f_unaccent(:keyword) || '%'
+                OR f_unaccent(COALESCE(t.description, tvi.description)) ILIKE '%' || f_unaccent(:keyword) || '%')
+            """,
+            nativeQuery = true)
+    Page<PlaceSummaryProjection> searchByKeyword(@Param("keyword") String keyword,
+                                                 @Param("locale") String locale,
+                                                 Pageable pageable);
+
+    /**
      * Thông tin tối thiểu của một địa điểm cho module khác (đánh giá, ghé thăm).
      * Tên lấy theo {@code :locale}, thiếu thì lùi về bản tiếng Việt.
      */

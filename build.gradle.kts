@@ -24,7 +24,7 @@ val mapstructVersion = "1.6.3"
 val springdocVersion = "3.1.0"
 val springModulithVersion = "2.1.2"
 val awsSdkVersion = "2.53.0"
-val anthropicVersion = "2.54.0"
+
 
 dependencies {
     // ── Spring Modulith: ranh giới module (Bước 2, kiến trúc BE thống nhất) ──
@@ -70,8 +70,9 @@ dependencies {
     implementation(platform("software.amazon.awssdk:bom:$awsSdkVersion"))
     implementation("software.amazon.awssdk:s3")
 
-    // ── Chatbot ──
-    implementation("com.anthropic:anthropic-java:$anthropicVersion")
+    // ── Chatbot: dùng Gemini qua REST API bằng RestClient, không cần SDK riêng ──
+    // (quyết định 2026-11-11: Gemini miễn phí thay cho Anthropic Claude; dependency
+    // anthropic-java cũ đã gỡ — code chưa từng dùng tới nó).
 
     // ── Mapping DTO ──
     implementation("org.mapstruct:mapstruct:$mapstructVersion")

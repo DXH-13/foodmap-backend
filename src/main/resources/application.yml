@@ -111,9 +111,14 @@ foodmap:
     secret-key: ${S3_SECRET_KEY:minioadmin}
     path-style-access: ${S3_PATH_STYLE_ACCESS:true}
 
+  # Chatbot dùng Gemini miễn phí (quyết định 2026-11-11, thay cho Anthropic
+  # Claude trước đây). Key lấy từ biến môi trường GEMINI_API_KEY — tạo key miễn
+  # phí ở https://aistudio.google.com/apikey rồi cho vào file .env của backend.
+  # Không bao giờ ghi key thật vào repo hay vào file này.
   chat:
-    api-key: ${ANTHROPIC_API_KEY:}
-    model: ${ANTHROPIC_MODEL:claude-opus-5}
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.0-flash}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
     max-messages-per-hour: 30
 
 logging:

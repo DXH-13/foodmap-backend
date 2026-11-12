@@ -33,6 +33,32 @@ public interface PlaceApi {
     PlaceDetails getPlace(UUID placeId);
 
     /**
+     * Tìm địa điểm quanh một toạ độ, sắp xếp theo khoảng cách tăng dần.
+     * Chỉ trả địa điểm đang hiển thị công khai (PUBLISHED, TEMPORARILY_CLOSED).
+     *
+     * <p>Thêm cho tool {@code search_places} của chatbot ở Bước 5 — chatbot gọi
+     * qua đây thay vì đọc thẳng bảng {@code places}.
+     *
+     * @param radiusMeters null thì dùng bán kính mặc định của cấu hình.
+     * @param limit số kết quả tối đa, ép về khoảng 1..10.
+     * @throws com.foodmap.common.BadRequestException mã {@code RADIUS_OUT_OF_RANGE}
+     *         hoặc {@code INVALID_COORDINATES} khi tham số ngoài khoảng cho phép.
+     */
+    List<PlaceSummary> searchNearby(double latitude, double longitude, Integer radiusMeters, int limit);
+
+    /**
+     * Tìm địa điểm theo từ khoá trên tên và mô tả, không phân biệt hoa thường và
+     * không phân biệt dấu (dùng {@code f_unaccent}). Chỉ trả địa điểm đang hiển
+     * thị công khai, sắp xếp theo điểm trung bình rồi số đánh giá.
+     *
+     * <p>Thêm cho tool {@code search_places} của chatbot ở Bước 5, cho câu hỏi
+     * không kèm toạ độ (ví dụ "quán phở ngon ở Quận 1").
+     *
+     * @param limit số kết quả tối đa, ép về khoảng 1..10.
+     */
+    List<PlaceSummary> searchByKeyword(String keyword, int limit);
+
+    /**
      * Người đã tạo địa điểm (cột {@code created_by}), nếu có.
      *
      * <p>Rỗng khi địa điểm không tồn tại, đã xoá mềm, hoặc được tạo từ dữ liệu

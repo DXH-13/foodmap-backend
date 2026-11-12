@@ -205,6 +205,22 @@ public class ReviewService implements ReviewApi {
                         review.getId(), review.getPlaceId(), review.getUserId(), review.getStatus()));
     }
 
+    /**
+     * Đánh giá đã duyệt mới nhất của một địa điểm, cho tool
+     * {@code list_place_reviews} của chatbot ở Bước 5.
+     */
+    @Transactional(readOnly = true)
+    @Override
+    public List<ReviewApi.ReviewSummary> listApprovedReviews(UUID placeId, int limit) {
+        Pageable pageable = PageRequest.of(0, Math.clamp(limit, 1, 10),
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+        return reviews.findByPlaceIdAndStatusAndDeletedAtIsNull(placeId, ReviewStatus.APPROVED, pageable)
+                .stream()
+                .map(review -> new ReviewApi.ReviewSummary(
+                        review.getId(), review.getRating(), review.getContent(), review.getCreatedAt()))
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     @Override
     public ReviewStats statsForPlace(UUID placeId) {

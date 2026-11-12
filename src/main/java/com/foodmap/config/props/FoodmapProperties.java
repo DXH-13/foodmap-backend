@@ -1,6 +1,5 @@
 package com.foodmap.config.props;
 
-import jakarta.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,8 +15,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "foodmap")
 public record FoodmapProperties(
         Cors cors,
-        Storage storage,
-        Chat chat
+        Storage storage
 ) {
 
     public record Cors(List<String> allowedOrigins) {}
@@ -29,11 +27,5 @@ public record FoodmapProperties(
             String accessKey,
             String secretKey,
             boolean pathStyleAccess
-    ) {}
-
-    public record Chat(
-            String apiKey,
-            String model,
-            @Min(1) int maxMessagesPerHour
     ) {}
 }

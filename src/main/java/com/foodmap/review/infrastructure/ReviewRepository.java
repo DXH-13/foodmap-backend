@@ -50,6 +50,13 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     long countByUserIdAndStatusAndDeletedAtIsNull(UUID userId, ReviewStatus status);
 
     /**
+     * Đánh giá đã duyệt của một địa điểm, mới nhất trước — cho tool
+     * {@code list_place_reviews} của chatbot ở Bước 5.
+     */
+    java.util.List<Review> findByPlaceIdAndStatusAndDeletedAtIsNull(
+            UUID placeId, ReviewStatus status, Pageable pageable);
+
+    /**
      * Điểm trung bình và số lượng đánh giá <b>đã duyệt</b> của một địa điểm.
      * Trả {@code [AVG, COUNT]}; AVG là {@code null} khi chưa có đánh giá nào.
      */
