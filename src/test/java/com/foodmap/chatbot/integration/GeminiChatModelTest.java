@@ -1,6 +1,6 @@
 package com.foodmap.chatbot.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.foodmap.chatbot.application.ChatModelException;
 import com.foodmap.chatbot.application.ChatRequest;
 import com.foodmap.chatbot.application.ChatResponse;

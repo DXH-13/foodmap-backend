@@ -1,8 +1,8 @@
 package com.foodmap.chatbot.integration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.foodmap.chatbot.application.ChatModel;
 import com.foodmap.chatbot.application.ChatModelException;
 import com.foodmap.chatbot.application.ChatPart;
@@ -85,6 +85,12 @@ public class GeminiChatModel implements ChatModel {
      * {@code NoSuchBeanDefinitionException} (CI run 43150401560).
      * {@code RestClient.builder()} là factory tĩnh của Spring Framework,
      * luôn có sẵn, không cần bean.
+     *
+     * <p>{@link ObjectMapper} ở đây là Jackson 3 ({@code tools.jackson}),
+     * vì đó là loại duy nhất mà {@code JacksonAutoConfiguration} của
+     * Boot 4.1 tạo bean — KHÔNG dùng {@code com.fasterxml.jackson}
+     * (Jackson 2): tiêm loại đó cũng gây {@code NoSuchBeanDefinitionException}
+     * (CI run 43181223216), dù class vẫn có trên classpath.
      */
     @Autowired
     public GeminiChatModel(ObjectMapper objectMapper,
@@ -225,11 +231,11 @@ public class GeminiChatModel implements ChatModel {
             for (JsonNode candidate : root.path("candidates")) {
                 for (JsonNode part : candidate.path("content").path("parts")) {
                     if (part.has("text")) {
-                        texts.add(part.path("text").asText(""));
+                        texts.add(part.path("text").asString(""));
                     }
                 }
             }
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new ChatModelException("Gemini tra ve chunk SSE sai dinh dang", ex);
         }
         return texts;
@@ -288,7 +294,7 @@ public class GeminiChatModel implements ChatModel {
             List<FunctionCall> calls = new ArrayList<>();
             for (JsonNode part : candidate.path("content").path("parts")) {
                 if (part.has("text")) {
-                    text.append(part.path("text").asText(""));
+                    text.append(part.path("text").asString(""));
                 }
                 if (part.has("functionCall")) {
                     JsonNode call = part.path("functionCall");
@@ -296,11 +302,11 @@ public class GeminiChatModel implements ChatModel {
                     if (call.has("args") && call.path("args").isObject()) {
                         args = objectMapper.convertValue(call.path("args"), Map.class);
                     }
-                    calls.add(new FunctionCall(call.path("name").asText(""), args));
+                    calls.add(new FunctionCall(call.path("name").asString(""), args));
                 }
             }
             return new ChatResponse(text.isEmpty() ? null : text.toString(), calls);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new ChatModelException("Gemini tra ve JSON sai dinh dang", ex);
         }
     }
@@ -310,7 +316,7 @@ public class GeminiChatModel implements ChatModel {
     private String toJson(Map<String, Object> body) {
         try {
             return objectMapper.writeValueAsString(body);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new ChatModelException("Loi khi tao request JSON cho Gemini", ex);
         }
     }
